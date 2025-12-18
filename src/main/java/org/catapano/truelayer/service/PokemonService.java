@@ -1,28 +1,29 @@
 package org.catapano.truelayer.service;
 
 import org.catapano.truelayer.client.PokemonClient;
-import org.catapano.truelayer.client.PokemonTranslationClient;
 import org.catapano.truelayer.domain.Pokemon;
-import org.catapano.truelayer.dto.PokemonResult;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.client.WebClientException;
 
 @Service
 public class PokemonService {
 
     private final PokemonClient pokemonClient;
-    private final PokemonTranslationClient translationClient;
 
-    PokemonService(PokemonClient pokemonClient, PokemonTranslationClient translationClient) {
+    PokemonService(PokemonClient pokemonClient) {
         this.pokemonClient = pokemonClient;
-        this.translationClient = translationClient;
     }
 
-    public Pokemon getPokemonInfo(String name){
-        return Pokemon.builder().build();
+    /**
+     * Get Pokemon info by name, with caching.
+     * @param name
+     * @return
+     * @throws WebClientException
+     */
+    @Cacheable(cacheNames = "pokemonInfo", key = "#name")
+    public Pokemon getPokemonInfo(String name) throws WebClientException {
+        return pokemonClient.getPokemonInfo(name);
     }
 
-
-    public Pokemon getPokemonTranslation(String name){
-        return  Pokemon.builder().build();
-    }
 }

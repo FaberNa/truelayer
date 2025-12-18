@@ -16,5 +16,4 @@ public class Pokemon {
     String description;
     Boolean isLegendary;
 
-
 }

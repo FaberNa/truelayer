@@ -1,0 +1,25 @@
+spring:
+  main:
+    banner-mode: "off"
+  application:
+    name: truelayer
+
+client:
+  pokemon:
+    uri: https://graphql.pokeapi.co2
+    readTimeout: 1500
+    connectTimeout: 1000
+
+  translate:
+    uri: https://api.funtranslations.com
+    readTimeout: 1500
+    connectTimeout: 1000
+server:
+  port: 8082
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} %-5level [%thread] %logger{36} - %msg%n"
+    level:
+        root: INFO
+        com.truelayer: INFO

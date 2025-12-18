@@ -3,6 +3,7 @@
 I have started by analyzing the problem domain, focusing in particular on the data model and capabilities exposed by external APIs.
 
 The first step was to study the **PokéAPI** domain, understanding how Pokémon-related data is structured and accessed, including:
+
 - Pokémon species information
 - Habitats
 - Legendary status
@@ -11,43 +12,86 @@ The first step was to study the **PokéAPI** domain, understanding how Pokémon-
 During this initial exploration, I quickly noticed that, in addition to the classic REST endpoints, the Pokédex data is also accessible through **GraphQL endpoints**, which provide more flexibility when querying related resources and reduce over-fetching by allowing more precise data selection.
 
 Reference:
+
 - https://pokeapi.co/
 - https://pokeapi.co/docs/graphql
 
+While exploring the Pokédex APIs through the GraphQL console at https://graphql.pokeapi.co/v1beta2/console, I noticed that the Pokémon description is exposed via the pokemonspeciesflavortexts field.
+For the purpose of this exercise, I assumed that taking the first available  flavor text was sufficient.
+Similarly, the habitat information is provided through the pokemonHabitat field.
+Based on these observations, I built the corresponding GraphQL query to retrieve all the required data in a single request.
+
 In parallel, I explored the **Fun Translations API**, evaluating how textual transformations can be applied to existing descriptions.
 Specifically, I analyzed the following translation services:
-- Yoda-style translation  
+
+- Yoda-style translation
   https://api.funtranslations.com/translate/yoda.json
-- Shakespeare-style translation  
+- Shakespeare-style translation
   https://api.funtranslations.com/translate/shakespeare.json
+-
+
 ## Problem Analysis & Domain Study
 
 I have started by analyzing the problem domain, focusing in particular on the data model and capabilities exposed by external APIs.
 
-The first step was to study the **PokéAPI** domain, understanding how Pokémon-related data is structured and accessed, including:
-- Pokémon species information
-- Habitats
-- Legendary status
-- Pokédex flavor texts and localization aspects
-
-During this initial exploration, I quickly noticed that, in addition to the classic REST endpoints, the Pokédex data is also accessible through **GraphQL endpoints**, which provide more flexibility when querying related resources and reduce over-fetching by allowing more precise data selection.
-
-Reference:
-- https://pokeapi.co/
-- https://pokeapi.co/docs/graphql
-
-In parallel, I explored the **Fun Translations API**, evaluating how textual transformations can be applied to existing descriptions.
-Specifically, I analyzed the following translation services:
-- Yoda-style translation  
-  https://api.funtranslations.com/translate/yoda.json
-- Shakespeare-style translation  
-  https://api.funtranslations.com/translate/shakespeare.json
-
 This initial analysis allowed me to better understand the data relationships, constraints, and integration points between the Pokémon domain and external text-translation services, laying the groundwork for a clean and extensible solution design.
 
 For model better i prefer use Lombok for not generate useless code
-I started by defining the skeleton of the problem: 
+I started by defining the skeleton of the problem:
+
 - domain class
 - service layer
-- external clients 
-Only after that, I moved on to writing the tests. Perhaps using separate DTO layer is unecessary since the API contact maps 1:1 to the domain model 
+- external clients
+  Only after that, I moved on to writing the tests. Perhaps using separate DTO layer is unecessary since the API contact maps 1:1 to the domain model , but seems to be necessary for external services
+  I decide to separate the service one for get the pokemon info other one for get the pokemon transaltion in this way each service has own responsability
+
+
+## External client
+
+A dedicated WebClientConfig class is used to centralize WebClient configuration (base URLs, timeouts, and headers) and promote consistency and reusability across all external API clients.
+After implementing the two clients, one for the translation API and one for the Pokémon API I modeled their response objects starting from real response and model it by tool  .
+
+## Caching Strategy for External APIs
+
+I considered that, given the rate limits defined in their contracts, introducing caching could be a useful optimization.
+The idea is to use two separate caches: one for translation results and one for standard Pokémon data.
+Failed or rate-limited translation attempts are deliberately excluded from caching, ensuring that temporary errors do not permanently affect future requests
+and allowing the system to recover automatically once the external service becomes available again
+
+## API Response, modeling Exception and logging
+
+I introduced the PokemonNotFoundException to  handle the case where the pokemon is not found, since the Pokémon API return an empty result set for certain queries.
+I also add the PokemonDescriptionNotFoundException to handle the case where the description is not found for a given Pokémon. During a test with this query i notice that description is empty
+For modeling an error i decide to not use custom DTO but use directly ProblemDetail provided by spring framework since is enough for this case
+```json
+query samplePokeAPIquery {
+  pokemon_detail: pokemonspecies(where: {name: {_eq: "dunsparce"}}) {
+    name
+    is_legendary
+    pokemonhabitat {
+      name
+    }
+    description: pokemonspeciesflavortexts(
+      where: {
+        language: {name: {_eq: "en"}}
+        version: {name: {_eq: "red"}}
+      }
+      limit: 10
+    ) {
+      flavor_text
+    }
+  }
+} 
+```
+Error handling for the translation API is encapsulated in the HTTP client, which returns an Optional.empty() in case of  failures, allowing the service layer to  fall back to the original description.
+
+## Serivce Modeling
+The service layer is composed of three services: PokemonService, TranslationService, PokemonTranslationService.
+- PokemonService: Responsible for fetching Pokémon data from the PokéAPI.
+- TranslationService: Handles text translation using the Fun Translations API.
+- PokemonTranslationService: Orchestrates the process of retrieving Pokémon data and applying translations when necessary.
+In this way each service has a single responsibility and can be tested independently. 
+Decoupling the services also allows for easier maintenance and potential future enhancements, such as adding new translation styles or integrating additional data sources.
+
+
+## HOW TO RUN THE APPLICATION
