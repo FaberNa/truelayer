@@ -54,11 +54,11 @@ public class PokemonClient {
     }
 
     protected Pokemon mapPokeApiResponseToPokemon(PokeApiResponse pokeApiResponse, String name) {
-        return Pokemon.builder().description(pokemonDescriptionMapper.extractDescription(pokeApiResponse, name))
-                .habitat(pokemonDescriptionMapper.extractHabitat(pokeApiResponse))
-                .name(name)
-                .isLegendary(pokemonDescriptionMapper.extractLegendary(pokeApiResponse))
-                .build();
+        return new Pokemon(name,
+                pokemonDescriptionMapper.extractHabitat(pokeApiResponse),
+                pokemonDescriptionMapper.extractDescription(pokeApiResponse, name),
+                pokemonDescriptionMapper.extractLegendary(pokeApiResponse));
+
     }
 
 

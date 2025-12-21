@@ -20,15 +20,19 @@ public class TranslationService {
 
         TranslationStyle translationStyle = chooseStyle(pokemon);
 
-        translateDescription(pokemon.getDescription(),translationStyle)
-                .ifPresent(pokemon::setDescription);
-
-        return pokemon;
+        return this.translateDescription(pokemon.description(), translationStyle)
+                .map(translated -> new Pokemon(
+                        pokemon.name(),
+                        pokemon.habitat(),
+                        translated,
+                        pokemon.isLegendary()
+                ))
+                .orElse(pokemon);
     }
 
     TranslationStyle chooseStyle(Pokemon pokemon) {
-        return (Boolean.TRUE.equals(pokemon.getIsLegendary())
-                || "cave".equalsIgnoreCase(pokemon.getHabitat()))
+        return (Boolean.TRUE.equals(pokemon.isLegendary())
+                || "cave".equalsIgnoreCase(pokemon.habitat()))
                 ? TranslationStyle.YODA
                 : TranslationStyle.SHAKESPEARE;
     }

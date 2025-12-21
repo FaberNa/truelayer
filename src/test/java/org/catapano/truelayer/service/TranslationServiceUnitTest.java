@@ -10,13 +10,13 @@ class TranslationServiceUnitTest {
 
     @Test
     void shouldReturnYodaWhenLegendary() {
-        Pokemon p = Pokemon.builder().isLegendary(true).habitat("rare").build();
+        Pokemon p = new Pokemon("","rare","",true);
         assertEquals(TranslationStyle.YODA, service.chooseStyle(p));
     }
 
     @Test
     void shouldReturnYodaWhenHabitatIsCave_caseInsensitive() {
-        Pokemon p = Pokemon.builder().isLegendary(false).habitat("CAVE").build();
+        Pokemon p = new Pokemon("","Cave","",true);
         assertEquals(TranslationStyle.YODA, service.chooseStyle(p));
     }
 

@@ -37,10 +37,10 @@ class PokemonServiceTest extends AbstractWireMockIT {
         var result = service.getPokemonInfo(pokemonName);
         assertThat(result)
                 .extracting(
-                        Pokemon::getName,
-                        Pokemon::getHabitat,
-                        Pokemon::getIsLegendary,
-                        Pokemon::getDescription
+                        Pokemon::name,
+                        Pokemon::habitat,
+                        Pokemon::isLegendary,
+                        Pokemon::description
                 )
                 .containsExactly(pokemonName, habitat, isLegendary, flavorText);
     }

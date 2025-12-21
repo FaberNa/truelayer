@@ -1,5 +1,5 @@
 package org.catapano.truelayer.service;
 
-public enum TranslationStyle {
+ enum TranslationStyle {
     YODA, SHAKESPEARE
 }

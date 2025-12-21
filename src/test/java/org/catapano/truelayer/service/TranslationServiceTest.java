@@ -47,20 +47,17 @@ class TranslationServiceTest extends AbstractWireMockIT {
 
         assertThat(result)
                 .extracting(
-                        Pokemon::getName,
-                        Pokemon::getHabitat,
-                        Pokemon::getIsLegendary,
-                        Pokemon::getDescription
+                        Pokemon::name,
+                        Pokemon::habitat,
+                        Pokemon::isLegendary,
+                        Pokemon::description
                 )
                 .containsExactly(pokemonName, habitat, isLegendary,descriptionTranslateShakespeare);
     }
 
     private Pokemon generatePokemon(String pokemonName, boolean isLegendary, String habitat, String description) {
-        return   Pokemon.builder().name(pokemonName)
-                .isLegendary(isLegendary)
-                .habitat(habitat)
-                .description(description)
-                .build();
+        return new Pokemon(pokemonName, habitat, description, isLegendary);
+
     }
 
 
@@ -91,10 +88,10 @@ class TranslationServiceTest extends AbstractWireMockIT {
 
         assertThat(result)
                 .extracting(
-                        Pokemon::getName,
-                        Pokemon::getHabitat,
-                        Pokemon::getIsLegendary,
-                        Pokemon::getDescription
+                        Pokemon::name,
+                        Pokemon::habitat,
+                        Pokemon::isLegendary,
+                        Pokemon::description
                 )
                 .containsExactly(pokemonName, habitat, isLegendary, translatedDescription);
     }
@@ -128,10 +125,10 @@ class TranslationServiceTest extends AbstractWireMockIT {
 
         assertThat(result)
                 .extracting(
-                        Pokemon::getName,
-                        Pokemon::getHabitat,
-                        Pokemon::getIsLegendary,
-                        Pokemon::getDescription
+                        Pokemon::name,
+                        Pokemon::habitat,
+                        Pokemon::isLegendary,
+                        Pokemon::description
                 )
                 .containsExactly(pokemonName, habitat, isLegendary, translatedDescription);
     }
@@ -155,10 +152,10 @@ class TranslationServiceTest extends AbstractWireMockIT {
 
         assertThat(result)
                 .extracting(
-                        Pokemon::getName,
-                        Pokemon::getHabitat,
-                        Pokemon::getIsLegendary,
-                        Pokemon::getDescription
+                        Pokemon::name,
+                        Pokemon::habitat,
+                        Pokemon::isLegendary,
+                        Pokemon::description
                 )
                 .containsExactly(pokemonName, habitat, isLegendary, originalDescription);
     }
@@ -172,7 +169,7 @@ class TranslationServiceTest extends AbstractWireMockIT {
 
         Pokemon result = service.getPokemonTranslated(pokemonInput);
 
-        assertThat(result.getDescription()).isEmpty();
+        assertThat(result.description()).isEmpty();
 
     }
 
@@ -182,7 +179,7 @@ class TranslationServiceTest extends AbstractWireMockIT {
         String pokemonName = "unknown";
         Pokemon pokemonInput=generatePokemon(pokemonName,false,"forest",null);
         Pokemon result = service.getPokemonTranslated(pokemonInput);
-        assertThat(result.getDescription()).isNull();
+        assertThat(result.description()).isNull();
     }
 
 }
