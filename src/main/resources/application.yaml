@@ -6,7 +6,7 @@ spring:
 
 client:
   pokemon:
-    uri: https://graphql.pokeapi.co2
+    uri: https://graphql.pokeapi.co
     readTimeout: 1500
     connectTimeout: 1000
 

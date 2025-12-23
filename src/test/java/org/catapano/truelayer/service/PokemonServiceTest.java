@@ -2,6 +2,7 @@ package org.catapano.truelayer.service;
 
 import org.catapano.truelayer.domain.Pokemon;
 import org.catapano.truelayer.exception.PokemonDescriptionNotFoundException;
+import org.catapano.truelayer.exception.PokemonNameNotFoundException;
 import org.catapano.truelayer.exception.PokemonNotFoundException;
 import org.catapano.truelayer.helper.AbstractWireMockIT;
 import org.junit.jupiter.api.DisplayName;
@@ -52,8 +53,8 @@ class PokemonServiceTest extends AbstractWireMockIT {
         stubsPokemonApi().stubPokemonSpeciesEmptyResult(pokemonName);
 
         assertThatThrownBy(() -> service.getPokemonInfo(pokemonName))
-                .isInstanceOf(PokemonNotFoundException.class)
-                .hasMessageContaining("Pokemon not found: " + pokemonName);
+                .isInstanceOf(PokemonNameNotFoundException.class)
+                .hasMessageContaining("Pokemon name not found in pokeApi service");
     }
 
     @Test

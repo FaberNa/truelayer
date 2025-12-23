@@ -36,7 +36,6 @@ I have started by analyzing the problem domain, focusing in particular on the da
 
 This initial analysis allowed me to better understand the data relationships, constraints, and integration points between the Pokémon domain and external text-translation services, laying the groundwork for a clean and extensible solution design.
 
-For model better i prefer use Lombok for not generate useless code
 I started by defining the skeleton of the problem:
 
 - domain class
@@ -95,3 +94,42 @@ Decoupling the services also allows for easier maintenance and potential future 
 
 
 ## HOW TO RUN THE APPLICATION
+The application is built using Spring Boot and can be run locally with the following steps:
+
+Make sure the following are installed on your system:
+•	Java 24
+•	Maven 3.9+
+
+Verify the installed versions:
+```bash
+java -version
+mvn -version
+```
+
+From the project root directory, run:
+```bash 
+mvn spring-boot:run
+```
+
+The application will start on http://localhost:8082/swagger-ui.html by default.
+Alternatively, you can build and run the executable JAR:
+```bash
+mvn clean package
+java -jar target/truelayer0.0.1-SNAPSHOT.jar
+```
+
+Default configuration
+•	Default port: 8082
+Configuration file:
+•	 src/main/resources/application.properties
+
+### What I’d do differently for production
+For a production deployment, I would consider the following enhancements:
+
+• Add  retries with backoff + jitter for both external APIs (PokéAPI + FunTranslations).
+• Add a circuit breaker / bulkhead  so FunTranslations failures can’t cascade and overload your app.
+• Add rate limiting  client-side throttling for FunTranslations (since it’s explicitly rate-limited and you already considered caching partly for this reason)
+• Use a distributed cache  (e.g., Redis) instead of in-memory caching to support scalability and persistence across application restarts.
+• Implement monitoring and alerting  to track application health, performance metrics ( like rate error , and error rates) 
+• Adding security measures  such as API authentication, HTTPS, and input validation to protect against common vulnerabilities.
+• Add secret scanning easily, no keys in repo

@@ -7,11 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.extern.java.Log;
-import lombok.extern.slf4j.Slf4j;
 import org.catapano.truelayer.domain.Pokemon;
 import org.catapano.truelayer.service.PokemonService;
 import org.catapano.truelayer.service.PokemonTranslationService;
+import org.slf4j.LoggerFactory;
+import org.slf4j.Logger;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -21,9 +21,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping(path = "/pokemon", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Pokemon", description = "Pokemon retrieval APIs")
-@Slf4j
+
 public class PokemonController {
 
+    private static final Logger log =
+            LoggerFactory.getLogger(PokemonController.class);
     private final PokemonService pokemonService;
 
     private final PokemonTranslationService pokemonTranslationService;

@@ -3,6 +3,8 @@ package org.catapano.truelayer.client;
 import org.catapano.truelayer.domain.Pokemon;
 import org.catapano.truelayer.dto.GraphQLRequest;
 import org.catapano.truelayer.dto.PokeApiResponse;
+import org.catapano.truelayer.exception.PokemonNameNotFoundException;
+import org.catapano.truelayer.exception.PokemonNotFoundException;
 import org.catapano.truelayer.mapper.PokemonDescriptionMapper;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -10,6 +12,7 @@ import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientException;
 
 import java.util.Map;
+import java.util.Optional;
 
 @Component
 public class PokemonClient {
@@ -50,15 +53,25 @@ public class PokemonClient {
                 .retrieve()
                 .bodyToMono(PokeApiResponse.class)
                 .block();
-        return mapPokeApiResponseToPokemon(response, name);
+        return mapPokeApiResponseToPokemon(response);
     }
 
-    protected Pokemon mapPokeApiResponseToPokemon(PokeApiResponse pokeApiResponse, String name) {
+    protected Pokemon mapPokeApiResponseToPokemon(PokeApiResponse pokeApiResponse) {
+        var name = extractName(pokeApiResponse);
         return new Pokemon(name,
                 pokemonDescriptionMapper.extractHabitat(pokeApiResponse),
-                pokemonDescriptionMapper.extractDescription(pokeApiResponse, name),
+                pokemonDescriptionMapper.extractDescription(pokeApiResponse,name),
                 pokemonDescriptionMapper.extractLegendary(pokeApiResponse));
 
+    }
+
+    private static String extractName(PokeApiResponse pokeApiResponse) {
+        return Optional.ofNullable(pokeApiResponse)
+                .map(PokeApiResponse::data)
+                .map(PokeApiResponse.Data::pokemon_detail)
+                .flatMap(list -> list.stream().findFirst())
+                .map(PokeApiResponse.PokemonDetail::name)
+                .orElseThrow(PokemonNameNotFoundException::new);
     }
 
 

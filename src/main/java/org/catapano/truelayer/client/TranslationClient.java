@@ -18,51 +18,29 @@ public class TranslationClient {
         this.webClient = funTranslationsWebClient;
     }
 
-        public Optional<String> getTranslationToYoda(String description) {
-            try {
-                TranslationResponse response = webClient.post()
-                        .uri("/translate/yoda.json")
-                        .body(BodyInserters.fromFormData("text", description))
-                        .retrieve()
-                        .bodyToMono(TranslationResponse.class)
-                        .block();
-
-                if (response == null ||
-                        response.contents() == null ||
-                        response.contents().translated() == null ||
-                        response.contents().translated().isBlank()) {
-                    return Optional.empty();
-                }
-
-                return Optional.of(response.contents().translated());
-
-            } catch (WebClientResponseException e) {
-                // other http error → fallback
-                return Optional.empty();
-            }
-        }
+    public Optional<String> getTranslationToYoda(String description) {
+        return getTranslation(description, "yoda");
+    }
 
 
-    public Optional<String> getTranslationToShakespeare(String description){
+    public Optional<String> getTranslationToShakespeare(String description) {
+        return getTranslation(description, "shakespeare");
+    }
+
+    private Optional<String> getTranslation(String description, String translationType) {
         try {
             TranslationResponse response = webClient.post()
-                    .uri("/translate/shakespeare.json")
+                    .uri("/translate/" + translationType + ".json")
                     .body(BodyInserters.fromFormData("text", description))
                     .retrieve()
                     .bodyToMono(TranslationResponse.class)
                     .block();
 
-            if (response == null ||
-                    response.contents() == null ||
-                    response.contents().translated() == null ||
-                    response.contents().translated().isBlank()) {
-                return Optional.empty();
-            }
-
-            return Optional.of(response.contents().translated());
+            return Optional.ofNullable(response)
+                    .map(TranslationResponse::contents)
+                    .map(TranslationResponse.Contents::translated);
 
         } catch (WebClientResponseException e) {
-            // other http error → fallback
             return Optional.empty();
         }
     }
