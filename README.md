@@ -133,3 +133,26 @@ For a production deployment, I would consider the following enhancements:
 • Implement monitoring and alerting  to track application health, performance metrics ( like rate error , and error rates) 
 • Adding security measures  such as API authentication, HTTPS, and input validation to protect against common vulnerabilities.
 • Add secret scanning easily, no keys in repo
+
+
+## Bonus track 
+From the root of the project, build the executable JAR:
+```bash
+mvn clean package
+```
+This step is required to generate the JAR file under the target/ directory, which is used by the Docker image.
+To build the Docker image, run from the root of the project:
+```bash
+docker build -f docker/Dockerfile -t pokedex:last .
+```
+This command builds the Docker image using the specified Dockerfile and tags it as pokedex:last.
+To run the Docker container, execute:
+```bash
+docker run -p 8082:8082 pokedex:last
+```
+The application will be available at: http://localhost:8082/swagger-ui.html
+
+For this exercise I intentionally kept the Docker image simple and predictable (copy the built JAR and run it).
+CDS/AppCDS optimizations were intentionally not enabled to keep the Docker setup minimal and portable for the exercise. ( some example in Dockerfile.prod )
+
+  

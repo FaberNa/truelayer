@@ -1,0 +1,45 @@
+# syntax=docker/dockerfile:1
+
+# STAGE 1 - BUILDER
+FROM bellsoft/liberica-runtime-container:jre-24-cds-slim-musl AS builder
+WORKDIR /usr/app
+
+ARG JAR_FILE=target/*.jar
+COPY ${JAR_FILE} app.jar
+
+# Extract Spring Boot layers
+RUN java -Djarmode=tools -jar app.jar extract --layers --destination extracted
+
+RUN cp -pr extracted/dependencies/* ./
+RUN cp -pr extracted/application/* ./
+
+# Generate CDS archive (AppCDS)
+RUN java \
+  -XX:ArchiveClassesAtExit=./app.jsa \
+  -Xshare:on \
+  -Dspring.context.exit=onRefresh \
+  -jar app.jar
+
+COPY docker/start-service.sh ./
+# Install necessary libraries
+FROM alpine:3.20 AS libs
+RUN apk add --no-cache libgcc libstdc++
+# STAGE 2 - FINAL
+FROM bellsoft/liberica-runtime-container:jre-24-cds-slim-musl AS final
+COPY --from=libs /usr/lib/libgcc_s.so.1 /usr/lib/
+COPY --from=libs /usr/lib/libstdc++.so.6 /usr/lib/
+
+WORKDIR /usr/app
+
+RUN addgroup -S app && adduser -S app -G app
+USER app:app
+
+COPY --from=builder /usr/app/extracted/dependencies/ ./
+COPY --from=builder /usr/app/app.jsa /usr/app/start-service.sh /usr/app/extracted/application/ ./
+
+ARG IMAGE_TAG
+ENV INFO_TAG=$IMAGE_TAG
+ARG GIT_COMMIT
+ENV INFO_COMMIT=$GIT_COMMIT
+
+CMD ./start-service.sh
