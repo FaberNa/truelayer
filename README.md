@@ -28,27 +28,21 @@ Specifically, I analyzed the following translation services:
   https://api.funtranslations.com/translate/yoda.json
 - Shakespeare-style translation
   https://api.funtranslations.com/translate/shakespeare.json
--
-
-## Problem Analysis & Domain Study
-
-I have started by analyzing the problem domain, focusing in particular on the data model and capabilities exposed by external APIs.
-
-This initial analysis allowed me to better understand the data relationships, constraints, and integration points between the Pokémon domain and external text-translation services, laying the groundwork for a clean and extensible solution design.
 
 I started by defining the skeleton of the problem:
 
 - domain class
 - service layer
 - external clients
-  Only after that, I moved on to writing the tests. Perhaps using separate DTO layer is unecessary since the API contact maps 1:1 to the domain model , but seems to be necessary for external services
-  I decide to separate the service one for get the pokemon info other one for get the pokemon transaltion in this way each service has own responsability
 
+Only after that, I moved on to writing the tests.
+Perhaps using a separate DTO layer is unnecessary since the internal API contract maps 1:1 to the domain model.
+I decide to separate the service one for get the pokemon info other one for get the pokemon translation in this way each service has own responsibility
 
 ## External client
 
 A dedicated WebClientConfig class is used to centralize WebClient configuration (base URLs, timeouts, and headers) and promote consistency and reusability across all external API clients.
-After implementing the two clients, one for the translation API and one for the Pokémon API I modeled their response objects starting from real response and model it by tool  .
+After implementing the two clients—one for the translation API and one for the Pokémon API—I modeled their response objects starting from real API responses, using tooling support where helpful.
 
 ## Caching Strategy for External APIs
 
@@ -84,7 +78,8 @@ query samplePokeAPIquery {
 ```
 Error handling for the translation API is encapsulated in the HTTP client, which returns an Optional.empty() in case of  failures, allowing the service layer to  fall back to the original description.
 
-## Serivce Modeling
+## Service Layer Design
+
 The service layer is composed of three services: PokemonService, TranslationService, PokemonTranslationService.
 - PokemonService: Responsible for fetching Pokémon data from the PokéAPI.
 - TranslationService: Handles text translation using the Fun Translations API.
@@ -92,8 +87,8 @@ The service layer is composed of three services: PokemonService, TranslationServ
 In this way each service has a single responsibility and can be tested independently. 
 Decoupling the services also allows for easier maintenance and potential future enhancements, such as adding new translation styles or integrating additional data sources.
 
-
 ## HOW TO RUN THE APPLICATION
+
 The application is built using Spring Boot and can be run locally with the following steps:
 
 Make sure the following are installed on your system:
@@ -130,7 +125,7 @@ For a production deployment, I would consider the following enhancements:
 • Add a circuit breaker / bulkhead  so FunTranslations failures can’t cascade and overload your app.
 • Add rate limiting  client-side throttling for FunTranslations (since it’s explicitly rate-limited and you already considered caching partly for this reason)
 • Use a distributed cache  (e.g., Redis) instead of in-memory caching to support scalability and persistence across application restarts.
-• Implement monitoring and alerting  to track application health, performance metrics ( like rate error , and error rates) 
+• Implement monitoring and alerting  to track application health, performance metrics ( like rate error ) 
 • Adding security measures  such as API authentication, HTTPS, and input validation to protect against common vulnerabilities.
 • Add secret scanning easily, no keys in repo
 
@@ -141,18 +136,17 @@ From the root of the project, build the executable JAR:
 mvn clean package
 ```
 This step is required to generate the JAR file under the target/ directory, which is used by the Docker image.
+Before proceeding with the Docker steps, make sure Docker is installed and running locally on your machine.
 To build the Docker image, run from the root of the project:
 ```bash
 docker build -f docker/Dockerfile -t pokedex:last .
 ```
 This command builds the Docker image using the specified Dockerfile and tags it as pokedex:last.
-To run the Docker container, execute:
+To run the Docker container, execute the following command (you can choose any external port you prefer, e.g. 8087):
 ```bash
-docker run -p 8082:8082 pokedex:last
+docker run -p 8087:8082 pokedex:last
 ```
 The application will be available at: http://localhost:8082/swagger-ui.html
 
 For this exercise I intentionally kept the Docker image simple and predictable (copy the built JAR and run it).
 CDS/AppCDS optimizations were intentionally not enabled to keep the Docker setup minimal and portable for the exercise. ( some example in Dockerfile.prod )
-
-  
