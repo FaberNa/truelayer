@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1
 
 # STAGE 1 - BUILDER
-FROM bellsoft/liberica-runtime-container:jre-24-cds-slim-musl AS builder
+FROM bellsoft/liberica-runtime-container:jre-25-cds-slim-musl AS builder
 WORKDIR /usr/app
 
 ARG JAR_FILE=target/*.jar
@@ -24,8 +24,9 @@ COPY docker/start-service.sh ./
 # Install necessary libraries
 FROM alpine:3.20 AS libs
 RUN apk add --no-cache libgcc libstdc++
+
 # STAGE 2 - FINAL
-FROM bellsoft/liberica-runtime-container:jre-24-cds-slim-musl AS final
+FROM bellsoft/liberica-runtime-container:jre-25-cds-slim-musl AS final
 COPY --from=libs /usr/lib/libgcc_s.so.1 /usr/lib/
 COPY --from=libs /usr/lib/libstdc++.so.6 /usr/lib/
 

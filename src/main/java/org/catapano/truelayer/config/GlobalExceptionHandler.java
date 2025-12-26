@@ -21,7 +21,7 @@ public class GlobalExceptionHandler {
             LoggerFactory.getLogger(GlobalExceptionHandler.class);
     @ExceptionHandler({PokemonNotFoundException.class, PokemonNameNotFoundException.class})
     public ResponseEntity<ProblemDetail> handlePokemonNotFound(
-            PokemonNotFoundException ex,
+            RuntimeException ex,
             HttpServletRequest request
     ) {
         ProblemDetail pd = ProblemDetail.forStatus(HttpStatus.NOT_FOUND);

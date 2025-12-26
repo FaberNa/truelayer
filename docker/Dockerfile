@@ -1,5 +1,5 @@
 # STAGE 1: extract layers
-FROM eclipse-temurin:24-jre-alpine AS builder
+FROM eclipse-temurin:25-jre-alpine AS builder
 WORKDIR /app
 
 ARG JAR_FILE=target/*.jar
@@ -10,7 +10,7 @@ COPY docker/start-service.sh ./
 RUN java -Djarmode=tools -jar app.jar extract --layers --destination /app/layers
 
 # STAGE 2: runtime
-FROM eclipse-temurin:24-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 RUN apk add --no-cache libgcc libstdc++
 
 WORKDIR /usr/app

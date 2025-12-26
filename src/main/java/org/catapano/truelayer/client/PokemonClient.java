@@ -42,9 +42,7 @@ public class PokemonClient {
 
     public Pokemon getPokemonInfo(String name) throws WebClientException {
 
-        String query = POKEMON_SPECIES_QUERY.formatted(name);
-
-        GraphQLRequest body = new GraphQLRequest(query, Map.of("name", name));
+        GraphQLRequest body = new GraphQLRequest(POKEMON_SPECIES_QUERY, Map.of("name", name));
 
         PokeApiResponse response = webClient.post()
                 .uri("/v1beta2")

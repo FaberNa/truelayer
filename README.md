@@ -92,8 +92,20 @@ Decoupling the services also allows for easier maintenance and potential future 
 The application is built using Spring Boot and can be run locally with the following steps:
 
 Make sure the following are installed on your system:
-•	Java 24
+•	Java 25
 •	Maven 3.9+
+
+The project setup uses Nix to provide a simple and fast development environment.
+Nix ensures all dependencies are installed consistently, without requiring manual setup.
+You can install Nix by following the instructions at:
+
+https://nixos.org/download/#download-nix
+
+Once Nix is installed, you can run the following command to enter a ready-to-use development shell:
+
+```bash
+nix --extra-experimental-features "nix-command flakes" develop
+```
 
 Verify the installed versions:
 ```bash
