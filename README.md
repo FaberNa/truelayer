@@ -16,9 +16,9 @@ Reference:
 - https://pokeapi.co/
 - https://pokeapi.co/docs/graphql
 
-While exploring the Pokédex APIs through the GraphQL console at https://graphql.pokeapi.co/v1beta2/console, I noticed that the Pokémon description is exposed via the pokemonspeciesflavortexts field.
+While exploring the Pokédex APIs through the GraphQL console at https://graphql.pokeapi.co/v1beta2/console, I noticed that the Pokémon description is exposed via the `pokemonspeciesflavortexts` field.
 For the purpose of this exercise, I assumed that taking the first available  flavor text was sufficient.
-Similarly, the habitat information is provided through the pokemonHabitat field.
+Similarly, the habitat information is provided through the `pokemonHabitat` field.
 Based on these observations, I built the corresponding GraphQL query to retrieve all the required data in a single request.
 
 In parallel, I explored the **Fun Translations API**, evaluating how textual transformations can be applied to existing descriptions.
@@ -36,26 +36,26 @@ I started by defining the skeleton of the problem:
 - external clients
 
 Only after that, I moved on to writing the tests.
-Perhaps using a separate DTO layer is unnecessary since the internal API contract maps 1:1 to the domain model.
+For the sake of the exercise, I opted for avoiding a separate DTo layer, since the payloads maps 1:1 to the domain model.
 I decide to separate the service one for get the pokemon info other one for get the pokemon translation in this way each service has own responsibility
 
 ## External client
 
-A dedicated WebClientConfig class is used to centralize WebClient configuration (base URLs, timeouts, and headers) and promote consistency and reusability across all external API clients.
+A dedicated `WebClientConfig` class is used to centralize WebClient configuration (base URLs, timeouts, and headers) and promote consistency and reusability across all external API clients.
 After implementing the two clients—one for the translation API and one for the Pokémon API—I modeled their response objects starting from real API responses, using tooling support where helpful.
 
 ## Caching Strategy for External APIs
 
-I considered that, given the rate limits defined in their contracts, introducing caching could be a useful optimization.
+Since there are at most 1,025 Pokémon and their data is lightweight, storing all of them in memory is perfectly reasonable
 The idea is to use two separate caches: one for translation results and one for standard Pokémon data.
 Failed or rate-limited translation attempts are deliberately excluded from caching, ensuring that temporary errors do not permanently affect future requests
 and allowing the system to recover automatically once the external service becomes available again
 
 ## API Response, modeling Exception and logging
 
-I introduced the PokemonNotFoundException to  handle the case where the pokemon is not found, since the Pokémon API return an empty result set for certain queries.
-I also add the PokemonDescriptionNotFoundException to handle the case where the description is not found for a given Pokémon. During a test with this query i notice that description is empty
-For modeling an error i decide to not use custom DTO but use directly ProblemDetail provided by spring framework since is enough for this case
+I introduced the `PokemonNotFoundException` to  handle the case where the pokemon is not found, since the Pokémon API return an empty result set for certain queries.
+I also add the `PokemonDescriptionNotFoundException` to handle the case where the description is not found for a given Pokémon. During a test with this query I notice that description is empty
+For modeling an error I decide to not use custom DTO but use directly ProblemDetail provided by spring framework since is enough for this case
 ```json
 query samplePokeAPIquery {
   pokemon_detail: pokemonspecies(where: {name: {_eq: "dunsparce"}}) {
@@ -80,10 +80,10 @@ Error handling for the translation API is encapsulated in the HTTP client, which
 
 ## Service Layer Design
 
-The service layer is composed of three services: PokemonService, TranslationService, PokemonTranslationService.
-- PokemonService: Responsible for fetching Pokémon data from the PokéAPI.
-- TranslationService: Handles text translation using the Fun Translations API.
-- PokemonTranslationService: Orchestrates the process of retrieving Pokémon data and applying translations when necessary.
+The service layer is composed of three services: `PokemonService`, `TranslationService`, `PokemonTranslationService`.
+- `PokemonService`: Responsible for fetching Pokémon data from the PokéAPI.
+- `TranslationService`: Handles text translation using the Fun Translations API.
+- `PokemonTranslationService`: Orchestrates the process of retrieving Pokémon data and applying translations when necessary.
 In this way each service has a single responsibility and can be tested independently. 
 Decoupling the services also allows for easier maintenance and potential future enhancements, such as adding new translation styles or integrating additional data sources.
 
@@ -116,7 +116,7 @@ java -jar target/truelayer0.0.1-SNAPSHOT.jar
 Default configuration
 •	Default port: 8082
 Configuration file:
-•	 src/main/resources/application.properties
+•	 src/main/resources/application.yaml
 
 ### What I’d do differently for production
 For a production deployment, I would consider the following enhancements:
